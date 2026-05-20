@@ -1,0 +1,25 @@
+# Env and deps
+venv/
+
+# Demucs files
+outputs/
+uploads/
+
+# confidential files
+.env*
+
+# Logs
+*.log
+
+# Pycashe
+**/__pycache__/
+*.py[cod]
+.eslintcache
+
+# Audofiles
+*.mp3
+*.flac
+*.wav
+
+# VScode settings
+.vscode/
