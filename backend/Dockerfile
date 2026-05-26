@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем код приложения
 COPY app/ ./app/
+COPY static/ ./static/
 
 # Папки для загрузок и результатов
 RUN mkdir -p uploads outputs
