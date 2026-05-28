@@ -5,7 +5,7 @@ venv/
 outputs/
 uploads/
 
-# confidential files
+# Confidential files
 .env*
 
 # Logs

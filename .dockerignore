@@ -1,0 +1,26 @@
+# Pycashe
+**/__pycache__/
+*.py[cod]
+.eslintcache
+*.pyc
+*.pyo
+*.pyd
+
+# Confidential files
+.env*
+
+# Venv
+.venv
+
+# Git
+.git
+
+# Demucs files
+outputs/
+uploads/
+
+# Logs
+*.log
+
+# VScode settings
+.vscode/

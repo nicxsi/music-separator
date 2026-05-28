@@ -48,6 +48,7 @@ class DemucsProcessor(IAudioProcessor):
 
     def _run_subprocess(self, cmd, log_path: Path):
         with open(log_path, "w", encoding="utf-8") as log:
+            # FIXME: BLocking or rewriting a data in the log file
             return subprocess.run(cmd, stdout=log, stderr=log).returncode
 
     def _prepare_command(self, input_path: Path, output_path: Path,

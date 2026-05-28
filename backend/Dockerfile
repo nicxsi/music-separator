@@ -1,21 +1,23 @@
 FROM python:3.11-slim
 
-# Системные зависимости для работы с аудио (ffmpeg нужен Demucs)
+# Read docker logs
+ENV PYTHONUNBUFFERED=1
+
+# System dependencies for running Demucs (Demucs uses ffmpeg)
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Сначала копируем requirements
+# First copy the requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем код приложения
-COPY app/ ./app/
-COPY static/ ./static/
+# Copy the app code
+COPY . .
 
-# Папки для загрузок и результатов
+# The folders for uploads and outputs
 RUN mkdir -p uploads outputs
 
 EXPOSE 8000
