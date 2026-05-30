@@ -66,3 +66,11 @@ class SeparationService:
             raise FileNotFoundError(f"Result file missing for job: {job_id}")
 
         return zip_path
+
+    async def get_job(self, job_id: str) -> Job:
+        job = await self.job_repo.get(job_id)
+
+        if job is None:
+            raise LookupError(...)
+
+        return job

@@ -1,6 +1,6 @@
 from app.application.services.separation_service import SeparationService
 from app.dependencies import get_separation_service
-from app.presentation.schemas.pydantic_models import SeparationResponse
+from app.presentation.schemas.pydantic_models import JobResponse, SeparationResponse
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
@@ -47,3 +47,19 @@ async def download(
         raise HTTPException(status_code=409, detail=str(e))
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/jobs/{job_id}")
+async def get_job(
+    job_id: str,
+    service: SeparationService = Depends(get_separation_service)
+):
+    try:
+        job = await service.get_job(job_id)
+        return JobResponse(
+            job_id=job.id,
+            status=job.status,
+            filename=job.filename,
+            error=job.error
+        )
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Job not found")

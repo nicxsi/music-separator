@@ -13,3 +13,10 @@ class SeparationResponse(BaseModel):
     status: JobStatus
 
     model_config = {"from_attributes": True}
+
+
+class JobResponse(BaseModel):
+    job_id: str
+    status: JobStatus
+    filename: str | None = None
+    error: str | None = None
