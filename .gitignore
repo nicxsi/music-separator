@@ -10,6 +10,7 @@ uploads/
 
 # Logs
 *.log
+backend/logs/
 
 # Pycashe
 **/__pycache__/

@@ -1,4 +1,4 @@
-from app.domain.entities import Job
+from app.domain.entities import Job, JobStatus
 from app.infrastructure.database.models.job_model import JobORM
 
 
@@ -6,7 +6,7 @@ def to_domain(orm: JobORM) -> Job:
     return Job(
         id=str(orm.id),
         filename=orm.filename,
-        status=orm.status,
+        status=JobStatus(orm.status),
         error=orm.error,
     )
 

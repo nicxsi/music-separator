@@ -13,3 +13,7 @@ class IFileRepository(ABC):
     @abstractmethod
     def get_zip_path(self, job_id: str) -> Path:
         pass
+
+    @abstractmethod
+    async def create_zip_archive(self, job_id: str, filename: str) -> Path:
+        pass

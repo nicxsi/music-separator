@@ -18,6 +18,6 @@ class Settings(BaseSettings):
 
     UPLOAD_DIR: Path = BASE_DIR / "uploads"
     OUTPUT_DIR: Path = BASE_DIR / "outputs"
-    DEMUCS_LOG_PATH: Path = BASE_DIR / "demucs.log"
+    DEMUCS_LOG_PATH: Path = BASE_DIR / "logs" / "demucs.log"
 
 settings = Settings()

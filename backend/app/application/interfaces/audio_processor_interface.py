@@ -6,5 +6,5 @@ class IAudioProcessor(ABC):
 
     @abstractmethod
     async def run_separation(self, input_path: Path,
-                             audio_format: str) -> None:
+                             audio_format: str, job_id: str) -> None:
         pass

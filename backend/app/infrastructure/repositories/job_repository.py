@@ -9,16 +9,16 @@ class JobRepository(IJobRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, job: Job):
+    async def create(self, job: Job) -> None:
         orm = to_orm(job)
         self.session.add(orm)
         await self.session.commit()
 
-    async def get(self, job_id: str):
+    async def get(self, job_id: str) -> Job | None:
         result = await self.session.get(JobORM, job_id)
         return to_domain(result) if result else None
 
-    async def update(self, job: Job):
+    async def update(self, job: Job) -> None:
         result = await self.session.get(JobORM, job.id)
         if result:
             result.status = job.status.value

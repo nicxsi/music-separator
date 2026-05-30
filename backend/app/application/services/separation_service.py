@@ -4,7 +4,7 @@ from typing import BinaryIO, ClassVar
 from app.application.interfaces.audio_processor_interface import IAudioProcessor
 from app.application.interfaces.job_repository_interface import IJobRepository
 from app.application.interfaces.repository_interface import IFileRepository
-from app.domain.entities import Job
+from app.domain.entities import Job, JobStatus
 
 
 class SeparationService:
@@ -26,20 +26,43 @@ class SeparationService:
             raise ValueError(f"Unsupported file format: {audio_format}")
 
         job = Job(filename=filename)
+        await self.job_repo.create(job)  # First, the job is pending
+
         job.start_processing()
-        await self.job_repo.create(job)
+        # Then, the job moves to a processing status
+        await self.job_repo.update(job)
 
         try:
             input_path = await self.repo.save_upload(
                 file_stream, filename, job.id
             )
-            await self.audio_processor.run_separation(input_path, audio_format)
+            await self.audio_processor.run_separation(
+                input_path, audio_format, job.id
+            )
+            # Create the zip archive with stems
+            await self.repo.create_zip_archive(job.id, filename)
 
         except Exception as e:
             job.fail(e)
             await self.job_repo.update(job)
             raise
 
-        job.complete()
+        job.complete()  # Finally, the job is completed
         await self.job_repo.update(job)
         return job
+
+    async def get_result(self, job_id: str) -> Path:
+        job = await self.job_repo.get(job_id)
+
+        if job is None:
+            raise LookupError(f"Job not found: {job_id}")
+
+        if job.status != JobStatus.COMPLETED:
+            raise ValueError(f"Job not completed: {job.status.value}")
+
+        zip_path = self.repo.get_zip_path(job_id)
+
+        if not zip_path.exists():
+            raise FileNotFoundError(f"Result file missing for job: {job_id}")
+
+        return zip_path

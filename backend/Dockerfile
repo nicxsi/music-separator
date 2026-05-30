@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # The folders for uploads and outputs
-RUN mkdir -p uploads outputs
+RUN mkdir -p uploads outputs logs
 
 EXPOSE 8000
 

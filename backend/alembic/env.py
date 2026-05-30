@@ -4,7 +4,6 @@ from alembic import context
 from app.core.config import settings
 from app.infrastructure.database.engine import engine
 from app.infrastructure.database.models.job_model import Base
-from sqlalchemy.ext.asyncio import AsyncEngine
 
 config = context.config
 
