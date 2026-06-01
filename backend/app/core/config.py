@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     )
 
     DATABASE_URL: str = Field(default="")
+    RABBITMQ_URL: str = Field(default="")
 
     UPLOAD_DIR: Path = BASE_DIR / "uploads"
     OUTPUT_DIR: Path = BASE_DIR / "outputs"

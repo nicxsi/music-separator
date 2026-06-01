@@ -4,10 +4,10 @@ uvicorn[standard]
 python-multipart
 demucs
 httpx
-pytest
-pytest-asyncio
-torchcodec
 sqlalchemy
 asyncpg
 alembic
 greenlet
+celery
+pytest
+pytest-asyncio
