@@ -10,6 +10,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d music_separator"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -20,6 +26,69 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.api
+    container_name: music_separator_migrate
+    command: alembic upgrade head
+    env_file:
+      - ./.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.api
+    container_name: music_separator_api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    env_file:
+      - ./.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - app_uploads:/app/uploads
+      - app_outputs:/app/outputs
+      - app_logs:/app/logs
+
+  worker:
+    environment:
+      TORCH_HOME: /torch-cache
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    container_name: music_separator_worker
+    command: celery -A app.infrastructure.messaging.celery_app worker --loglevel=info --concurrency=2
+    env_file:
+      - ./.env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./torch-cache:/torch-cache
+      - app_uploads:/app/uploads
+      - app_outputs:/app/outputs
+      - app_logs:/app/logs
 
 volumes:
   postgres_data:
+  app_uploads:
+  app_outputs:
+  app_logs:

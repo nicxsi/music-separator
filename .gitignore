@@ -5,6 +5,9 @@ venv/
 outputs/
 uploads/
 
+# Demucs model
+torch-cache/
+
 # Confidential files
 .env*
 

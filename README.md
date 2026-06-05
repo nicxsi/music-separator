@@ -1,5 +1,192 @@
 # Music Separator
 
-## Send a POST request to test Demucs separation on a local audio file.
+A web service where you can upload an audio file, automatically split the track into separate tracks (stems) using Demucs, and download the result as a ZIP archive.
 
-## curl -X POST http://localhost:8000/separate -F "file=@E:\Downloads\Example.mp3" -v
+## Features
+
+* Accepts audio files via HTTP API;
+* Creates a task and saves it in PostgreSQL;
+* Sends the task to the RabbitMQ queue;
+* Processes the file asynchronously using a Celery worker;
+* Splits the track into stems using Demucs;
+* Saves the result to a shared volume;
+* Allows you to check the task status;
+* Allows you to download the finished ZIP archive with the results.
+
+## Architecture
+
+The service has several parts:
+
+* **FastAPI** — receives requests and sends responses;
+* **PostgreSQL** — stores tasks and their statuses;
+* **RabbitMQ** — the task queue;
+* **Celery worker** — runs the heavy background processing;
+* **Demucs** — splits the audio file into tracks.
+
+## Main Workflow
+
+1. The user sends a file to `POST /api/separate`.
+2. The server creates a task with the `pending` status.
+3. The task goes to RabbitMQ.
+4. The Celery worker takes the task and changes the status to `processing`.
+5. Demucs splits the audio file.
+6. The result is packed into a ZIP archive.
+7. The task status changes to `completed`.
+8. The user downloads the archive via `GET /api/download/{job_id}`.
+
+## API
+
+### `POST /api/separate`
+
+Uploads an audio file and creates a processing task.
+
+**Supported formats:**
+
+* `mp3`
+* `wav`
+* `flac`
+
+**Response:**
+
+```json
+{
+  "job_id": "0980261f-cc9e-414f-91cc-efbbc5176f99",
+  "status": "pending"
+}
+```
+
+### `GET /api/jobs/{job_id}`
+
+Returns the current status of the task.
+
+**Response example:**
+
+```json
+{
+  "job_id": "0980261f-cc9e-414f-91cc-efbbc5176f99",
+  "status": "completed",
+  "filename": "Example.wav",
+  "error": null
+}
+```
+
+### `GET /api/download/{job_id}`
+
+Downloads the ZIP archive with the results (if the task is finished successfully).
+
+## How to Use
+
+### 1. Run the project with Docker Compose
+
+Run this command from the project root folder:
+
+```bash
+docker compose up -d --build
+```
+
+After it starts, you can access:
+
+* FastAPI: `http://localhost:8000`
+* RabbitMQ Management: `http://localhost:15672`
+* PostgreSQL: `localhost:5432`
+
+### 2. Apply migrations
+
+If the migrations did not apply automatically, run:
+
+```bash
+docker compose exec api alembic upgrade head
+```
+
+### 3. Send a file for processing
+
+Example with `curl`:
+
+```bash
+curl.exe -X POST http://localhost:8000/api/separate -F "file=@E:\Downloads\Example.wav"
+```
+
+### 4. Check the task status
+
+Use the `job_id`, from the previous response:
+
+```bash
+curl.exe http://localhost:8000/api/jobs/<job_id>
+```
+
+### 5. Download the result
+
+When the status is `completed`, run:
+
+```bash
+curl.exe -O http://localhost:8000/api/download/<job_id>
+```
+
+## Local Run (Without Docker)
+
+If you want to run the project locally instead of using containers:
+
+* Start FastAPI using: `uvicorn app.main:app --reload`
+* Start the Celery worker separately
+* PostgreSQL and RabbitMQ must be running locally
+
+For local mode, set these environment variables with correct addresses:
+
+```env
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/music_separator
+RABBITMQ_URL=amqp://guest:guest@localhost:5672//
+```
+
+## Task Statuses
+
+* `pending` — the task is created and waiting for processing;
+* `processing` — the task is running right now;
+* `completed` — processing finished successfully;
+* `failed` — an error happened during processing.
+
+## Where Files Are Stored
+
+* Uploaded files are saved in the `uploads` folder;
+* Temporary and final files are saved in the `outputs` folder;
+* Demucs logs are saved in the `logs` folder.
+
+In Docker, these directories are mounted as shared volumes so that the API and the worker can use the same files.
+
+## Notes
+
+* Demucs might download the model when you process a file for the first time;
+* You might need a VPN or a stable internet connection to download the model;
+* The first run of the worker can take more time because it needs to download the model.
+
+## Technologies
+
+* Python 3.11
+* FastAPI
+* PostgreSQL
+* SQLAlchemy
+* Alembic
+* RabbitMQ
+* Celery
+* Demucs
+* Docker
+
+## Troubleshooting (Possible Errors)
+
+### `relation "jobs" does not exist`
+
+This means migrations are not applied. Run this command:
+
+```bash
+docker compose exec api alembic upgrade head
+```
+
+### `Cannot connect to amqp://...`
+
+Check that RabbitMQ is running and your `RABBITMQ_URL` points to the correct address.
+
+### `Demucs ended with the code 1`
+
+Check the worker logs and the Demucs log file in the `logs` folder.
+
+---
+

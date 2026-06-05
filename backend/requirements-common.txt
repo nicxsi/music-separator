@@ -1,0 +1,10 @@
+fastapi
+pydantic_settings
+sqlalchemy
+greenlet
+alembic
+python-multipart
+httpx
+pytest
+pytest-asyncio
+psycopg2-binary==2.9.9
