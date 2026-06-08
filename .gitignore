@@ -9,7 +9,7 @@ uploads/
 torch-cache/
 
 # Confidential files
-.env*
+.env
 
 # Logs
 *.log

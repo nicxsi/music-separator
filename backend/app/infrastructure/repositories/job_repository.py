@@ -22,7 +22,8 @@ class JobRepository(IJobRepository):
 
     async def update(self, job: Job) -> None:
         result = await self.session.get(JobORM, UUID(job.id))
-        if result:
-            result.status = job.status.value
-            result.error = job.error
-            await self.session.commit()
+        if result is None:
+            raise LookupError(f"Job not found for update: {job.id}")
+        result.status = job.status.value
+        result.error = job.error
+        await self.session.commit()

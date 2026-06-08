@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from app.domain.entities import Job, JobStatus
 from app.infrastructure.database.models.job_model import JobORM
 
@@ -13,7 +15,7 @@ def to_domain(orm: JobORM) -> Job:
 
 def to_orm(domain: Job) -> JobORM:
     return JobORM(
-        id=domain.id,
+        id=UUID(domain.id),
         filename=domain.filename,
         status=domain.status.value,
         error=domain.error,

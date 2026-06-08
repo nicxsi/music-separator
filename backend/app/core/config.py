@@ -21,4 +21,6 @@ class Settings(BaseSettings):
     OUTPUT_DIR: Path = BASE_DIR / "outputs"
     DEMUCS_LOG_PATH: Path = BASE_DIR / "logs" / "demucs.log"
 
+    TIMEZONE: str = "Europe/Bucharest"
+
 settings = Settings()

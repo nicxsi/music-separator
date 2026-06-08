@@ -76,7 +76,23 @@ Downloads the ZIP archive with the results (if the task is finished successfully
 
 ## How to Use
 
-### 1. Run the project with Docker Compose
+### 1. Create environment variables
+
+Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+For Windows:
+
+```powershell
+copy .env.example .env
+```
+
+The default values are already configured for Docker Compose.
+
+### 2. Run the project with Docker Compose
 
 Run this command from the project root folder:
 
@@ -90,7 +106,7 @@ After it starts, you can access:
 * RabbitMQ Management: `http://localhost:15672`
 * PostgreSQL: `localhost:5432`
 
-### 2. Apply migrations
+### 3. Apply migrations
 
 If the migrations did not apply automatically, run:
 
@@ -98,7 +114,7 @@ If the migrations did not apply automatically, run:
 docker compose exec api alembic upgrade head
 ```
 
-### 3. Send a file for processing
+### 4. Send a file for processing
 
 Example with `curl`:
 
@@ -106,7 +122,7 @@ Example with `curl`:
 curl.exe -X POST http://localhost:8000/api/separate -F "file=@E:\Downloads\Example.wav"
 ```
 
-### 4. Check the task status
+### 5. Check the task status
 
 Use the `job_id`, from the previous response:
 
@@ -114,7 +130,7 @@ Use the `job_id`, from the previous response:
 curl.exe http://localhost:8000/api/jobs/<job_id>
 ```
 
-### 5. Download the result
+### 6. Download the result
 
 When the status is `completed`, run:
 
@@ -122,20 +138,18 @@ When the status is `completed`, run:
 curl.exe -O http://localhost:8000/api/download/<job_id>
 ```
 
-## Local Run (Without Docker)
+## Environment Variables
 
-If you want to run the project locally instead of using containers:
+The project uses Docker Compose networking.
 
-* Start FastAPI using: `uvicorn app.main:app --reload`
-* Start the Celery worker separately
-* PostgreSQL and RabbitMQ must be running locally
-
-For local mode, set these environment variables with correct addresses:
+Container names are used as hostnames:
 
 ```env
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/music_separator
-RABBITMQ_URL=amqp://guest:guest@localhost:5672//
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/music_separator
+RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
 ```
+
+`postgres` and `rabbitmq` are Docker service names defined in `docker-compose.yml`.
 
 ## Task Statuses
 
@@ -146,8 +160,9 @@ RABBITMQ_URL=amqp://guest:guest@localhost:5672//
 
 ## Where Files Are Stored
 
-* Uploaded files are saved in the `uploads` folder;
-* Temporary and final files are saved in the `outputs` folder;
+* Uploaded files are stored in a Docker volume mounted to `/app/uploads`;
+* Generated stems and ZIP archives are stored in a Docker volume mounted to `/app/outputs`;
+* API and Celery worker share the same volumes;
 * Demucs logs are saved in the `logs` folder.
 
 In Docker, these directories are mounted as shared volumes so that the API and the worker can use the same files.

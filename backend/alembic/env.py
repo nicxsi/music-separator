@@ -4,6 +4,7 @@ from alembic import context
 from app.core.config import settings
 from app.infrastructure.database.engine import engine
 from app.infrastructure.database.models.job_model import Base
+from sqlalchemy.engine import make_url
 
 config = context.config
 
@@ -15,7 +16,7 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline():
-    url = settings.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+    url = make_url(settings.DATABASE_URL).set(drivername="postgresql")
 
     context.configure(
         url=url,

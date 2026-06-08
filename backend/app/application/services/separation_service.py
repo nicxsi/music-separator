@@ -5,6 +5,7 @@ from typing import BinaryIO, ClassVar
 from app.application.interfaces.job_repository_interface import IJobRepository
 from app.application.interfaces.repository_interface import IFileRepository
 from app.application.interfaces.task_queue_interface import ITaskQueue
+from app.application.utils import extract_audio_format
 from app.domain.entities import Job, JobStatus
 
 
@@ -20,7 +21,7 @@ class SeparationService:
         self.task_queue = task_queue
 
     async def submit(self, file_stream: BinaryIO, filename: str) -> Job:
-        audio_format = Path(filename).suffix.removeprefix(".")
+        audio_format = extract_audio_format(filename)
 
         if audio_format not in self._ALLOWED_FORMATS:
             raise ValueError(f"Unsupported file format: {audio_format}")
