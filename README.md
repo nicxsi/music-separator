@@ -146,6 +146,7 @@ Container names are used as hostnames:
 
 ```env
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/music_separator
+TEST_DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/music_separator_test
 RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
 ```
 
@@ -157,6 +158,14 @@ RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
 * `processing` — the task is running right now;
 * `completed` — processing finished successfully;
 * `failed` — an error happened during processing.
+
+## Testing
+
+The project includes:
+
+* Unit tests;
+* API tests;
+* Integration tests with PostgreSQL.
 
 ## Where Files Are Stored
 
