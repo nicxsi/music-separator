@@ -1,10 +1,27 @@
+from pathlib import Path
+
 from app.application.services.separation_service import SeparationService
 from app.dependencies import get_separation_service
+from app.domain.entities import JobStatus
 from app.presentation.schemas.pydantic_models import JobResponse, SeparationResponse
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
 router = APIRouter()
+
+_STEM_NAMES = ("vocals", "drums", "bass", "other")
+
+def _build_stem_urls(job_id: str, filename: str) -> dict[str, str]:
+    """
+    Builds a dictionary {stem_name: url} for playback in the browser
+    Demucs puts the results in:
+      outputs/htdemucs/{job_id}_{filename_stem}/{vocals,drums,bass,other}.{ext}
+    Where ext matches the input file format (mp3/flac/wav)
+    """
+    file_stem = Path(filename).stem          # "Example.flac" → "Example"
+    audio_ext = Path(filename).suffix.lstrip(".")  # "flac"
+    base = f"/outputs/htdemucs/{job_id}_{file_stem}"
+    return {name: f"{base}/{name}.{audio_ext}" for name in _STEM_NAMES}
 
 
 @router.post("/separate", response_model=SeparationResponse, status_code=202)
@@ -64,11 +81,17 @@ async def get_job(
     """
     try:
         job = await service.get_job(job_id)
+
+        stems = None
+        if job.status == JobStatus.COMPLETED and job.filename:
+            stems = _build_stem_urls(job_id, job.filename)
+
         return JobResponse(
             job_id=job.id,
             status=job.status,
             filename=job.filename,
-            error=job.error
+            error=job.error,
+            stems=stems,
         )
     except LookupError:
         raise HTTPException(status_code=404, detail="Job not found")

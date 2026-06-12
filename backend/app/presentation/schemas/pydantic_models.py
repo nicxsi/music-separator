@@ -20,3 +20,4 @@ class JobResponse(BaseModel):
     status: JobStatus
     filename: str | None = None
     error: str | None = None
+    stems: dict[str, str] | None = None
