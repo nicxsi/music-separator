@@ -11,9 +11,9 @@ class CeleryTaskQueue(ITaskQueue):
         # IMPORTANT: Lazy import (inside the method) is used to prevent
         # Cyclic dependency (Circular Import).
         #
-        # Module `tasks.py ` indirectly depends on
+        # Module `tasks.py` indirectly depends on
         # the application/infrastructure layers
-        # that initialize this `CeleryTaskQueue'. If you import
+        # that initialize this `CeleryTaskQueue'. If the import is
         # `process_job` at the module level, Python will loop
         # when building the API container.
         from app.infrastructure.tasks.tasks import process_job

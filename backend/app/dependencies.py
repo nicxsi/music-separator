@@ -9,20 +9,19 @@ from app.infrastructure.repositories.file_repository import FileRepository
 from app.infrastructure.repositories.job_repository import JobRepository
 
 
-def get_separation_service(
-    session: AsyncSession = Depends(get_db)
+async def get_separation_service(
+    db: AsyncSession = Depends(get_db),
 ) -> SeparationService:
     repo = FileRepository(
         upload_dir=settings.UPLOAD_DIR,
-        output_dir=settings.OUTPUT_DIR
+        output_dir=settings.OUTPUT_DIR,
     )
 
-    job_repo = JobRepository(session=session)
-
+    job_repo = JobRepository(session=db)
     task_queue = CeleryTaskQueue()
 
     return SeparationService(
         repository=repo,
         job_repository=job_repo,
-        task_queue=task_queue
+        task_queue=task_queue,
     )

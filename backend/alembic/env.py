@@ -2,8 +2,12 @@ from logging.config import fileConfig
 
 from alembic import context
 from app.core.config import settings
+from app.infrastructure.database.base import Base
 from app.infrastructure.database.engine import engine
-from app.infrastructure.database.models.job_model import Base
+from app.infrastructure.database.models import (  # noqa: F401
+    browser_session_model,
+    job_model,
+)
 from sqlalchemy.engine import make_url
 
 config = context.config

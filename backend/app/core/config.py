@@ -23,4 +23,8 @@ class Settings(BaseSettings):
 
     TIMEZONE: str = "Europe/Bucharest"
 
+    SESSION_COOKIE_NAME: str = "browser_session"
+    SESSION_LIFETIME_DAYS: int = 30
+    COOKIE_SECURE: bool = True
+
 settings = Settings()

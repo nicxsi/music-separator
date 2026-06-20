@@ -1,1 +1,5 @@
-from app.infrastructure.database.models.job_model import Base
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    pass

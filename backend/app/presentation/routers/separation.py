@@ -2,7 +2,8 @@ from pathlib import Path
 
 from app.application.services.separation_service import SeparationService
 from app.dependencies import get_separation_service
-from app.domain.entities import JobStatus
+from app.domain.entities import BrowserSession, JobStatus
+from app.presentation.dependencies.browser_session import get_browser_session
 from app.presentation.schemas.pydantic_models import JobResponse, SeparationResponse
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
@@ -10,6 +11,7 @@ from fastapi.responses import FileResponse
 router = APIRouter()
 
 _STEM_NAMES = ("vocals", "drums", "bass", "other")
+
 
 def _build_stem_urls(job_id: str, filename: str) -> dict[str, str]:
     """
@@ -27,6 +29,7 @@ def _build_stem_urls(job_id: str, filename: str) -> dict[str, str]:
 @router.post("/separate", response_model=SeparationResponse, status_code=202)
 async def separate(
     file: UploadFile = File(...),
+    browser_session: BrowserSession = Depends(get_browser_session),
     service: SeparationService = Depends(get_separation_service),
 ):
     """
@@ -43,7 +46,11 @@ async def separate(
         )
 
     try:
-        job = await service.submit(file_stream=file.file, filename=filename)
+        job = await service.submit(
+            session_id=browser_session.id,
+            file_stream=file.file,
+            filename=filename,
+        )
         return SeparationResponse(job_id=job.id, status=job.status)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -51,14 +58,15 @@ async def separate(
 @router.get("/download/{job_id}")
 async def download(
     job_id: str,
-    service: SeparationService = Depends(get_separation_service)
+    browser_session: BrowserSession = Depends(get_browser_session),
+    service: SeparationService = Depends(get_separation_service),
 ):
     """
     Creates a zip-archive with audio lines
     Sends the finished archive
     """
     try:
-        zip_path = await service.get_result(job_id)
+        zip_path = await service.get_result(job_id, browser_session.id)
         return FileResponse(
             path=zip_path,
             media_type="application/zip",
@@ -74,13 +82,14 @@ async def download(
 @router.get("/jobs/{job_id}")
 async def get_job(
     job_id: str,
-    service: SeparationService = Depends(get_separation_service)
+    browser_session: BrowserSession = Depends(get_browser_session),
+    service: SeparationService = Depends(get_separation_service),
 ):
     """
     Retrieves the status and details of a specific separation job
     """
     try:
-        job = await service.get_job(job_id)
+        job = await service.get_job(job_id, browser_session.id)
 
         stems = None
         if job.status == JobStatus.COMPLETED and job.filename:
