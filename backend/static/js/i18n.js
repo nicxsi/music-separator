@@ -34,6 +34,7 @@ window.I18N = {
     errPoll: "Polling error",
     errFormat: "Supported formats: mp3, wav and flac.",
     errUpload: "An error occurred during upload.",
+    errTooLarge: "File is too large. Maximum size is 50 MB.",
   },
   ru: {
     brandTitle: "Music Separator",
@@ -70,5 +71,6 @@ window.I18N = {
     errPoll: "Ошибка опроса статуса",
     errFormat: "Поддерживаемые форматы: mp3, wav и flac.",
     errUpload: "Ошибка при отправке файла на сервер.",
+    errTooLarge: "Файл слишком большой. Максимальный размер — 50 МБ.",
   }
 };

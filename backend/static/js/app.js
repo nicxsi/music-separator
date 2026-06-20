@@ -235,7 +235,19 @@ els.uploadBtn.addEventListener("click", async () => {
     });
 
     if (!response.ok) {
-      throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        let message = t("errUpload");
+
+        try {
+            const data = await response.json();
+            message = data.detail;
+        }
+        catch {
+            if (response.status === 413) {
+                message = t("errTooLarge");
+            }
+        }
+
+        throw new Error(message);
     }
 
     const data = await response.json();

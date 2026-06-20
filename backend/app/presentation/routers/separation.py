@@ -5,6 +5,7 @@ from app.dependencies import get_separation_service
 from app.domain.entities import BrowserSession, JobStatus
 from app.presentation.dependencies.browser_session import get_browser_session
 from app.presentation.schemas.pydantic_models import JobResponse, SeparationResponse
+from app.presentation.validators.file_size import validate_file_size
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
@@ -39,6 +40,8 @@ async def separate(
     the Demucs neural network.
     Returns `job_id` to track the status.
     """
+    await validate_file_size(file)
+
     filename = file.filename
     if filename is None:
         raise HTTPException(
