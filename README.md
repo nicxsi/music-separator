@@ -2,6 +2,22 @@
 
 A web service where you can upload an audio file, automatically split the track into separate tracks (stems) using Demucs, and download the result as a ZIP archive.
 
+## Demo
+
+### Web interface
+
+#### Upload page
+
+![Service UI](docs/images/service_UI.PNG)
+
+#### Result page
+
+![Service Result UI](docs/images/service_result_UI.PNG)
+
+#### Full workflow
+
+![Workflow Demo](docs/run_service.gif)
+
 ## Features
 
 * Accepts audio files via HTTP API;

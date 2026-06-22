@@ -1,6 +1,7 @@
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1
+ENV TORCH_HOME=/torch-cache
 
 RUN apt-get update && apt-get install -y \
     ffmpeg \
@@ -10,6 +11,8 @@ WORKDIR /app
 
 COPY requirements-common.txt requirements-worker.txt ./
 RUN pip install --no-cache-dir -r requirements-worker.txt
+
+RUN python -c "from demucs.pretrained import get_model; get_model('htdemucs')"
 
 COPY . .
 

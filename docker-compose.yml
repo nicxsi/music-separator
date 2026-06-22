@@ -82,7 +82,7 @@ services:
       rabbitmq:
         condition: service_healthy
     volumes:
-      - ./torch-cache:/torch-cache
+      - demucs_cache:/torch-cache
       - app_uploads:/app/uploads
       - app_outputs:/app/outputs
       - app_logs:/app/logs
@@ -92,3 +92,4 @@ volumes:
   app_uploads:
   app_outputs:
   app_logs:
+  demucs_cache:
