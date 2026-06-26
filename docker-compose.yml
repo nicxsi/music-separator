@@ -6,8 +6,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: music_separator
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,9 +18,6 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: music_separator_rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -54,17 +49,23 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     env_file:
       - ./.env
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     depends_on:
       migrate:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
+    restart: unless-stopped
     volumes:
       - app_uploads:/app/uploads
       - app_outputs:/app/outputs
       - app_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   worker:
     environment:
@@ -81,11 +82,26 @@ services:
         condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
+    restart: unless-stopped
     volumes:
       - demucs_cache:/torch-cache
       - app_uploads:/app/uploads
       - app_outputs:/app/outputs
       - app_logs:/app/logs
+
+  nginx:
+    image: nginx:alpine
+    container_name: music_separator_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:

@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY requirements-common.txt requirements-worker.txt ./
-RUN pip install --no-cache-dir -r requirements-worker.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --timeout 100 --retries 10 -r requirements-worker.txt
 
 RUN python -c "from demucs.pretrained import get_model; get_model('htdemucs')"
 
