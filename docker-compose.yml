@@ -68,13 +68,20 @@ services:
       retries: 5
 
   worker:
-    environment:
-      TORCH_HOME: /torch-cache
     build:
       context: ./backend
       dockerfile: Dockerfile.worker
-    container_name: music_separator_worker
     command: celery -A app.infrastructure.messaging.celery_app worker --loglevel=info --concurrency=2
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      TORCH_HOME: /torch-cache
+    container_name: music_separator_worker
     env_file:
       - ./.env
     depends_on:
