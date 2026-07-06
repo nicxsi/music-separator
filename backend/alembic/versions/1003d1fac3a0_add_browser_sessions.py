@@ -34,7 +34,7 @@ def upgrade() -> None:
     op.add_column('jobs', sa.Column('session_id', sa.Uuid(), nullable=True))
     # First, we create a "stub" in the session table so that the Foreign Key does not swear
     op.execute("""
-        INSERT INTO browser_sessions (id, token, created_at, last_seen_at, expires_at) 
+        INSERT INTO browser_sessions (id, token, created_at, last_seen_at, expires_at)
         VALUES ('00000000-0000-0000-0000-000000000000', 'migration_dummy_token', NOW(), NOW(), NOW() + INTERVAL '1 day')
         ON CONFLICT DO NOTHING
     """)
