@@ -1,0 +1,16 @@
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+]
+ignore = [
+    "E501",  # line too long — ruff already checks via line-length
+]
+
+[lint.per-file-ignores]
+"alembic/*" = ["F401"]   # in alembic/env.py implants are needed for side-effects

@@ -2,4 +2,3 @@
 celery
 demucs
 torchcodec
-asyncpg
