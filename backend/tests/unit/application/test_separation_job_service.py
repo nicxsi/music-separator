@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+
 from app.application.interfaces.job_repository_interface import IJobRepository
 from app.application.services.separation_job_service import SeparationJobService
 from app.domain.entities import Job, JobStatus
@@ -43,7 +44,7 @@ async def test_process_success_updates_statuses_and_creates_zip():
     service, job_repo, file_repo, processor = make_service()
 
     # side_effect intercepts the state of the object at the time
-    # of each update in the database, allowing us to check 
+    # of each update in the database, allowing us to check
     # the entire chain of status changes (PENDING -> PROCESSING -> COMPLETED)
     captured_statuses = []
 
@@ -87,7 +88,7 @@ async def test_process_failure_marks_job_failed_and_reraises():
     service, job_repo, file_repo, processor = make_service()
 
     # side_effect intercepts the state of the object at the time
-    # of each update in the database, allowing us to check 
+    # of each update in the database, allowing us to check
     # the entire chain of status changes (PENDING -> PROCESSING -> COMPLETED)
     captured_statuses = []
 

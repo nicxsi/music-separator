@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, Mock
 from uuid import UUID, uuid4
 
 import pytest
+
 from app.domain.entities import Job, JobStatus
 from app.infrastructure.database.models.job_model import JobORM
 from app.infrastructure.repositories.job_repository import JobRepository

@@ -4,8 +4,9 @@ from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
-from app.domain.entities import Job, JobStatus
 from httpx import ASGITransport, AsyncClient
+
+from app.domain.entities import Job, JobStatus
 
 
 class FakeSeparationService:

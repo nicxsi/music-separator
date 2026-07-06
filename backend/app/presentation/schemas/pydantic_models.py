@@ -1,5 +1,6 @@
-from app.domain.entities import JobStatus
 from pydantic import BaseModel
+
+from app.domain.entities import JobStatus
 
 
 class SeparationResponse(BaseModel):

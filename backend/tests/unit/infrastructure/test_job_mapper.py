@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 import pytest
+
 from app.domain.entities import Job, JobStatus
 from app.infrastructure.database.mappers.job_mapper import to_domain, to_orm
 from app.infrastructure.database.models.job_model import JobORM

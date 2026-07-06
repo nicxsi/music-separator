@@ -5,9 +5,10 @@ if TYPE_CHECKING:
     from app.infrastructure.database.models.browser_session_model import (
         BrowserSessionORM,
     )
-from app.infrastructure.database.base import Base
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.infrastructure.database.base import Base
 
 
 class JobORM(Base):

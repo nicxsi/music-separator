@@ -2,6 +2,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+
 from app.infrastructure.services.demucs_processor import DemucsProcessor
 
 

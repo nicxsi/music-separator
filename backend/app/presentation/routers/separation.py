@@ -1,13 +1,14 @@
 from pathlib import Path
 
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
+
 from app.application.services.separation_service import SeparationService
 from app.dependencies import get_separation_service
 from app.domain.entities import BrowserSession, JobStatus
 from app.presentation.dependencies.browser_session import get_browser_session
 from app.presentation.schemas.pydantic_models import JobResponse, SeparationResponse
 from app.presentation.validators.file_size import validate_file_size
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
 
 router = APIRouter()
 

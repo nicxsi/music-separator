@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+
 from app.application.interfaces.job_repository_interface import IJobRepository
 from app.application.services.separation_service import SeparationService
 from app.domain.entities import Job, JobStatus

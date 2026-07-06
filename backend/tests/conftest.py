@@ -1,8 +1,9 @@
 import os
 
 import pytest_asyncio
-from app.infrastructure.database.models.job_model import Base
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+from app.infrastructure.database.models.job_model import Base
 
 # Explicitly redefining the environment variables for the test environment
 # This ensures that the tests will never accidentally connect to a local or

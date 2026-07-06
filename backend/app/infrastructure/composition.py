@@ -1,9 +1,10 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.application.services.separation_job_service import SeparationJobService
 from app.core.config import settings
 from app.infrastructure.repositories.file_repository import FileRepository
 from app.infrastructure.repositories.job_repository import JobRepository
 from app.infrastructure.services.demucs_processor import DemucsProcessor
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def build_process_separation_service(

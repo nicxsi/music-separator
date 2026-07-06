@@ -1,6 +1,7 @@
 from uuid import UUID
 
 import pytest
+
 from app.domain.entities import Job
 from app.infrastructure.database.models.job_model import JobORM
 from app.infrastructure.repositories.job_repository import JobRepository
