@@ -52,6 +52,8 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"           # caches pip between launches — faster
+          # Specify the exact path to the dependency file so that there is no error
+          cache-dependency-path: "backend/requirements-api.txt"
 
       - name: Install dependencies
         working-directory: backend
