@@ -1,5 +1,6 @@
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
+from uuid import uuid4
 
 import pytest
 
@@ -7,6 +8,7 @@ from app.application.interfaces.job_repository_interface import IJobRepository
 from app.application.services.separation_job_service import SeparationJobService
 from app.domain.entities import Job, JobStatus
 
+session_id = uuid4()
 
 async def _run_in_thread(func, *args, **kwargs):
     return func(*args, **kwargs)
@@ -51,7 +53,7 @@ async def test_process_success_updates_statuses_and_creates_zip():
     async def local_capture(job):
         captured_statuses.append(job.status)
 
-    job = Job(id="job-1", filename="song.mp3")
+    job = Job(session_id=session_id, id="job-1", filename="song.mp3")
     job_repo.get = AsyncMock(return_value=job)
     job_repo.update = AsyncMock(side_effect=local_capture)
 
@@ -95,7 +97,7 @@ async def test_process_failure_marks_job_failed_and_reraises():
     async def local_capture(job):
         captured_statuses.append(job.status)
 
-    job = Job(id="job-1", filename="song.mp3")
+    job = Job(session_id=session_id, id="job-1", filename="song.mp3")
     job_repo.get = AsyncMock(return_value=job)
     job_repo.update = AsyncMock(side_effect=local_capture)
 
@@ -112,7 +114,10 @@ async def test_process_failure_marks_job_failed_and_reraises():
         new=_run_in_thread,
     ):
         with pytest.raises(RuntimeError, match="boom"):
-            await service.process("job-1", "song.mp3")
+            await service.process(
+                "job-1",
+                "song.mp3",
+            )
 
     assert job.status == JobStatus.FAILED
     assert job.error == "boom"

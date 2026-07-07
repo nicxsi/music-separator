@@ -1,6 +1,7 @@
 import zipfile
 from importlib import import_module
 from unittest.mock import AsyncMock
+from uuid import uuid4
 
 import pytest
 import pytest_asyncio
@@ -8,6 +9,7 @@ from httpx import ASGITransport, AsyncClient
 
 from app.domain.entities import Job, JobStatus
 
+session_id = uuid4()
 
 class FakeSeparationService:
     def __init__(self):
@@ -39,6 +41,7 @@ async def test_separate_returns_202_and_job_payload(app_instance, client):
     deps = import_module("app.dependencies")
     fake_service = FakeSeparationService()
     fake_service.submit.return_value = Job(
+        session_id=session_id,
         id="job-1",
         filename="song.mp3",
         status=JobStatus.PENDING,
@@ -111,6 +114,7 @@ async def test_get_job_returns_job_payload(app_instance, client):
     deps = import_module("app.dependencies")
     fake_service = FakeSeparationService()
     fake_service.get_job.return_value = Job(
+        session_id=session_id,
         id="job-1",
         filename="song.mp3",
         status=JobStatus.COMPLETED,

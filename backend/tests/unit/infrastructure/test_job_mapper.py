@@ -6,10 +6,12 @@ from app.domain.entities import Job, JobStatus
 from app.infrastructure.database.mappers.job_mapper import to_domain, to_orm
 from app.infrastructure.database.models.job_model import JobORM
 
+session_id = uuid4()
 
 def test_to_domain_maps_orm_to_domain():
     orm = JobORM(
         id=uuid4(),
+        session_id=session_id,
         filename="song.mp3",
         status="completed",
         error=None,
@@ -25,6 +27,7 @@ def test_to_domain_maps_orm_to_domain():
 
 def test_to_orm_maps_domain_to_orm():
     job = Job(
+        session_id=session_id,
         id=str(uuid4()),
         filename="song.mp3",
         status=JobStatus.FAILED,
@@ -41,6 +44,7 @@ def test_to_orm_maps_domain_to_orm():
 
 def test_to_orm_raises_for_invalid_uuid():
     job = Job(
+        session_id=session_id,
         id="not-a-uuid",
         filename="song.mp3",
         status=JobStatus.PENDING,

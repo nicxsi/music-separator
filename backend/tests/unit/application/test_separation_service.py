@@ -1,12 +1,15 @@
 from io import BytesIO
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
+from uuid import uuid4
 
 import pytest
 
 from app.application.interfaces.job_repository_interface import IJobRepository
 from app.application.services.separation_service import SeparationService
 from app.domain.entities import Job, JobStatus
+
+session_id = uuid4()
 
 
 def make_service():
@@ -41,7 +44,11 @@ async def test_submit_creates_job_saves_file_and_enqueues_task(filename):
         "app.application.services.separation_service.asyncio.to_thread",
         new=_run_in_thread,
     ):
-        job = await service.submit(file_stream=file_stream, filename=filename)
+        job = await service.submit(
+            session_id=session_id,
+            file_stream=file_stream,
+            filename=filename,
+        )
 
     assert job.filename == filename
     assert job.status == JobStatus.PENDING
@@ -63,7 +70,11 @@ async def test_submit_rejects_unsupported_format():
     job_repo.create = AsyncMock()
 
     with pytest.raises(ValueError, match="Unsupported file format: txt"):
-        await service.submit(file_stream=BytesIO(b"data"), filename="song.txt")
+        await service.submit(
+            session_id=session_id,
+            file_stream=BytesIO(b"data"),
+            filename="song.txt"
+        )
 
     job_repo.create.assert_not_called()
     repo.save_upload.assert_not_called()
@@ -74,17 +85,25 @@ async def test_submit_rejects_unsupported_format():
 async def test_get_result_returns_zip_path_when_job_completed(tmp_path):
     service, repo, job_repo, task_queue = make_service()
 
-    job = Job(id="job-1", filename="song.mp3", status=JobStatus.COMPLETED)
+    job = Job(
+        session_id=session_id,
+        id="job-1",
+        filename="song.mp3",
+        status=JobStatus.COMPLETED,
+    )
     job_repo.get = AsyncMock(return_value=job)
 
     zip_path = tmp_path / "job-1.zip"
     zip_path.write_text("test")
     repo.get_zip_path = Mock(return_value=zip_path)
 
-    result = await service.get_result("job-1")
+    result = await service.get_result(
+        "job-1",
+        session_id,
+    )
 
     assert result == zip_path
-    job_repo.get.assert_awaited_once_with("job-1")
+    job_repo.get.assert_awaited_once_with("job-1", session_id)
     repo.get_zip_path.assert_called_once_with("job-1")
 
 
@@ -95,45 +114,70 @@ async def test_get_result_raises_lookup_error_when_job_missing():
     job_repo.get = AsyncMock(return_value=None)
 
     with pytest.raises(LookupError, match="Job not found: job-404"):
-        await service.get_result("job-404")
+        await service.get_result(
+            "job-404",
+            session_id,
+        )
 
 
 @pytest.mark.asyncio
 async def test_get_result_raises_value_error_when_job_not_completed():
     service, repo, job_repo, task_queue = make_service()
 
-    job = Job(id="job-1", filename="song.mp3", status=JobStatus.PROCESSING)
+    job = Job(
+        session_id=session_id,
+        id="job-1",
+        filename="song.mp3",
+        status=JobStatus.PROCESSING,
+    )
     job_repo.get = AsyncMock(return_value=job)
 
     with pytest.raises(ValueError, match="Job not completed: processing"):
-        await service.get_result("job-1")
+        await service.get_result(
+            "job-1",
+            session_id,
+        )
 
 
 @pytest.mark.asyncio
 async def test_get_result_raises_file_not_found_when_zip_missing(tmp_path):
     service, repo, job_repo, task_queue = make_service()
 
-    job = Job(id="job-1", filename="song.mp3", status=JobStatus.COMPLETED)
+    job = Job(
+        session_id=session_id,
+        id="job-1",
+        filename="song.mp3",
+        status=JobStatus.COMPLETED,
+    )
     job_repo.get = AsyncMock(return_value=job)
 
     zip_path = tmp_path / "job-1.zip"  # not created
     repo.get_zip_path = Mock(return_value=zip_path)
 
-    with pytest.raises(FileNotFoundError, match="Result file missing for job: job-1"):
-        await service.get_result("job-1")
+    with pytest.raises(
+        FileNotFoundError,
+        match="Result file missing for job: job-1"
+        ):
+        await service.get_result(
+            "job-1",
+            session_id,
+        )
 
 
 @pytest.mark.asyncio
 async def test_get_job_returns_job_when_found():
     service, repo, job_repo, task_queue = make_service()
 
-    job = Job(id="job-1", filename="song.mp3")
+    job = Job(session_id=session_id, id="job-1", filename="song.mp3")
     job_repo.get = AsyncMock(return_value=job)
 
-    result = await service.get_job("job-1")
+    result = await service.get_job(
+        "job-1",
+        session_id,
+    )
 
     assert result is job
-    job_repo.get.assert_awaited_once_with("job-1")
+    job_repo.get.assert_awaited_once_with("job-1", session_id)
 
 
 @pytest.mark.asyncio
@@ -143,4 +187,7 @@ async def test_get_job_raises_lookup_error_when_missing():
     job_repo.get = AsyncMock(return_value=None)
 
     with pytest.raises(LookupError, match="Job not found: job-404"):
-        await service.get_job("job-404")
+        await service.get_job(
+            "job-404",
+            session_id,
+        )
