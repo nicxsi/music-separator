@@ -1,10 +1,11 @@
+from fastapi import Depends, Request, Response
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.application.services.session_service import BrowserSessionService
 from app.core.config import settings
 from app.domain.entities import BrowserSession
 from app.infrastructure.database.deps import get_db
 from app.infrastructure.repositories.session_repository import BrowserSessionRepository
-from fastapi import Depends, Request, Response
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def _set_session_cookie(response: Response, token: str) -> None:

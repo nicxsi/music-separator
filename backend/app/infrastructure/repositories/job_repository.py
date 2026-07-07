@@ -1,10 +1,11 @@
 from uuid import UUID
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.application.interfaces.job_repository_interface import IJobRepository
 from app.domain.entities import Job
 from app.infrastructure.database.mappers.job_mapper import to_domain, to_orm
 from app.infrastructure.database.models.job_model import JobORM
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class JobRepository(IJobRepository):

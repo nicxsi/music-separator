@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
- 
- 
+
+
 class IAudioProcessor(ABC):
- 
+
     @abstractmethod
     def run_separation(
         self, input_path: Path, audio_format: str, job_id: str

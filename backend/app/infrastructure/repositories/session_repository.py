@@ -1,11 +1,12 @@
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.application.interfaces.session_repository_interface import (
     IBrowserSessionRepository,
 )
 from app.domain.entities import BrowserSession
 from app.infrastructure.database.mappers.session_mapper import to_domain, to_orm
 from app.infrastructure.database.models.browser_session_model import BrowserSessionORM
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class BrowserSessionRepository(IBrowserSessionRepository):

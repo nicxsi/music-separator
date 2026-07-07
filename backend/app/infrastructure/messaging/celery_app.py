@@ -6,8 +6,9 @@ which means transferring task states back through
 the broker's temporary queues without permanent storage.
 """
 
-from app.core.config import settings
 from celery import Celery
+
+from app.core.config import settings
 
 celery_app = Celery(
     "music_separator",

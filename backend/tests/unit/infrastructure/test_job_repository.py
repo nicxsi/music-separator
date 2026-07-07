@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, Mock
 from uuid import UUID, uuid4
 
 import pytest
+
 from app.domain.entities import Job, JobStatus
 from app.infrastructure.database.models.job_model import JobORM
 from app.infrastructure.repositories.job_repository import JobRepository
@@ -20,7 +21,12 @@ async def test_create_adds_orm_object_and_commits():
     repo = JobRepository(session=session)
 
     job_id = str(uuid4())
-    job = Job(id=job_id, filename="song.mp3", status=JobStatus.PENDING)
+    job = Job(
+        id=job_id,
+        session_id=uuid4(),
+        filename="song.mp3",
+        status=JobStatus.PENDING
+    )
 
     await repo.create(job)
 
@@ -88,6 +94,7 @@ async def test_update_mutates_orm_and_commits():
 
     job = Job(
         id=str(job_uuid),
+        session_id=uuid4(),
         filename="song.mp3",
         status=JobStatus.COMPLETED,
         error=None,
@@ -110,6 +117,7 @@ async def test_update_does_not_commit_when_record_missing():
 
     job = Job(
         id=str(uuid4()),
+        session_id=uuid4(),
         filename="song.mp3",
         status=JobStatus.FAILED,
         error="boom"

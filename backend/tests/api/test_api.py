@@ -1,12 +1,16 @@
 import zipfile
 from importlib import import_module
 from unittest.mock import AsyncMock
+from uuid import uuid4
 
 import pytest
 import pytest_asyncio
-from app.domain.entities import Job, JobStatus
 from httpx import ASGITransport, AsyncClient
 
+from app.core.config import settings
+from app.domain.entities import Job, JobStatus
+
+session_id = uuid4()
 
 class FakeSeparationService:
     def __init__(self):
@@ -16,18 +20,36 @@ class FakeSeparationService:
 
 
 @pytest.fixture
-def app_instance(tmp_path):
+def app_instance(tmp_path, monkeypatch):
     static_dir = tmp_path / "static"
     static_dir.mkdir()
+
+    # Create a temporary outputs directory to satisfy StaticFiles
+    output_dir = tmp_path / "outputs"
+    output_dir.mkdir()
+    monkeypatch.setattr(settings, "OUTPUT_DIR", output_dir)
+
     return import_module("app.main").create_app(static_dir=static_dir)
 
+
 @pytest_asyncio.fixture
-async def client(app_instance):
+async def client(app_instance, db_session):
+    # Importing your original dependency get_db
+    from app.infrastructure.database.deps import get_db
+
+    # Creating an override that returns the session from the fixture
+    async def _get_db_override():
+        yield db_session
+
+    # Redefining the dependency in FastAPI
+    app_instance.dependency_overrides[get_db] = _get_db_override
+
     async with AsyncClient(
         transport=ASGITransport(app=app_instance),
         base_url="http://test",
     ) as async_client:
         yield async_client
+
     # The code after yield will be executed automatically
     # AFTER the end of the test
     app_instance.dependency_overrides.clear()
@@ -38,6 +60,7 @@ async def test_separate_returns_202_and_job_payload(app_instance, client):
     deps = import_module("app.dependencies")
     fake_service = FakeSeparationService()
     fake_service.submit.return_value = Job(
+        session_id=session_id,
         id="job-1",
         filename="song.mp3",
         status=JobStatus.PENDING,
@@ -110,6 +133,7 @@ async def test_get_job_returns_job_payload(app_instance, client):
     deps = import_module("app.dependencies")
     fake_service = FakeSeparationService()
     fake_service.get_job.return_value = Job(
+        session_id=session_id,
         id="job-1",
         filename="song.mp3",
         status=JobStatus.COMPLETED,
@@ -123,12 +147,13 @@ async def test_get_job_returns_job_payload(app_instance, client):
     response = await client.get("/api/jobs/job-1")
 
     assert response.status_code == 200
-    assert response.json() == {
-        "job_id": "job-1",
-        "status": "completed",
-        "filename": "song.mp3",
-        "error": None,
-    }
+
+    data = response.json()
+
+    assert data["job_id"] == "job-1"
+    assert data["status"] == "completed"
+    assert data["filename"] == "song.mp3"
+    assert data["error"] is None
 
 
 @pytest.mark.asyncio

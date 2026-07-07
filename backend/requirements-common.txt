@@ -6,5 +6,6 @@ alembic
 python-multipart
 httpx
 pytest
+asyncpg
 pytest-asyncio
 psycopg2-binary==2.9.9

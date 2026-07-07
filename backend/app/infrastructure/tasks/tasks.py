@@ -1,10 +1,11 @@
 import asyncio
 import socket
 
+from celery.utils.log import get_task_logger
+
 from app.infrastructure.composition import build_process_separation_service
 from app.infrastructure.database.worker_session import WorkerSessionLocal
 from app.infrastructure.messaging.celery_app import celery_app
-from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
 

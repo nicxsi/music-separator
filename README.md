@@ -1,3 +1,5 @@
+![CI](https://github.com/nicxsi/music-separator/actions/workflows/ci.yml/badge.svg)
+
 # Music Separator
 
 A web service where you can upload an audio file, automatically split the track into separate tracks (stems) using Demucs, and download the result as a ZIP archive.

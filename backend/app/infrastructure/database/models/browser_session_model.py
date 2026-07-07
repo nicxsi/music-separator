@@ -6,9 +6,10 @@ from uuid import UUID
 if TYPE_CHECKING:
     from app.infrastructure.database.models.job_model import JobORM
 
-from app.infrastructure.database.base import Base
 from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.infrastructure.database.base import Base
 
 
 class BrowserSessionORM(Base):
