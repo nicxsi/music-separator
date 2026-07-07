@@ -33,12 +33,23 @@ def app_instance(tmp_path, monkeypatch):
 
 
 @pytest_asyncio.fixture
-async def client(app_instance):
+async def client(app_instance, db_session):
+    # Importing your original dependency get_db
+    from app.infrastructure.database.deps import get_db
+
+    # Creating an override that returns the session from the fixture
+    async def _get_db_override():
+        yield db_session
+
+    # Redefining the dependency in FastAPI
+    app_instance.dependency_overrides[get_db] = _get_db_override
+
     async with AsyncClient(
         transport=ASGITransport(app=app_instance),
         base_url="http://test",
     ) as async_client:
         yield async_client
+
     # The code after yield will be executed automatically
     # AFTER the end of the test
     app_instance.dependency_overrides.clear()
