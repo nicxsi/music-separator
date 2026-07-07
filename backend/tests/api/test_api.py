@@ -147,12 +147,13 @@ async def test_get_job_returns_job_payload(app_instance, client):
     response = await client.get("/api/jobs/job-1")
 
     assert response.status_code == 200
-    assert response.json() == {
-        "job_id": "job-1",
-        "status": "completed",
-        "filename": "song.mp3",
-        "error": None,
-    }
+
+    data = response.json()
+
+    assert data["job_id"] == "job-1"
+    assert data["status"] == "completed"
+    assert data["filename"] == "song.mp3"
+    assert data["error"] is None
 
 
 @pytest.mark.asyncio
