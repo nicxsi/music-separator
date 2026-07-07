@@ -103,7 +103,7 @@ async def test_get_result_returns_zip_path_when_job_completed(tmp_path):
     )
 
     assert result == zip_path
-    job_repo.get.assert_awaited_once_with("job-1", session_id)
+    job_repo.get.assert_awaited_once_with("job-1")
     repo.get_zip_path.assert_called_once_with("job-1")
 
 
@@ -177,7 +177,7 @@ async def test_get_job_returns_job_when_found():
     )
 
     assert result is job
-    job_repo.get.assert_awaited_once_with("job-1", session_id)
+    job_repo.get.assert_awaited_once_with("job-1")
 
 
 @pytest.mark.asyncio

@@ -7,6 +7,7 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
+from app.core.config import settings
 from app.domain.entities import Job, JobStatus
 
 session_id = uuid4()
@@ -19,10 +20,17 @@ class FakeSeparationService:
 
 
 @pytest.fixture
-def app_instance(tmp_path):
+def app_instance(tmp_path, monkeypatch):
     static_dir = tmp_path / "static"
     static_dir.mkdir()
+
+    # Create a temporary outputs directory to satisfy StaticFiles
+    output_dir = tmp_path / "outputs"
+    output_dir.mkdir()
+    monkeypatch.setattr(settings, "OUTPUT_DIR", output_dir)
+
     return import_module("app.main").create_app(static_dir=static_dir)
+
 
 @pytest_asyncio.fixture
 async def client(app_instance):
