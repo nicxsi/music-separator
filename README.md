@@ -22,7 +22,7 @@ A web service where you can upload an audio file, automatically split the track 
 
 #### Grafana Observability Dashboard
 
-![Grafana Dashboard](docs/images/grafana.PNG)
+![Grafana Dashboard](docs/images/grafana.png)
 
 #### Full workflow
 
