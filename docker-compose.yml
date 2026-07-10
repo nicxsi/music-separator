@@ -23,15 +23,68 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "15692:15692"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_ENABLED_PLUGINS_FILE: /etc/rabbitmq/enabled_plugins
+    volumes:
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
     healthcheck:
       test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 10s
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: music_separator_prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"    # Store data for 7 days
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: music_separator_grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: music_separator_loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./grafana/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: music_separator_promtail
+    volumes:
+      - ./grafana/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock   # читает логи Docker
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
 
   migrate:
     build:
@@ -93,3 +146,6 @@ volumes:
   app_outputs:
   app_logs:
   demucs_cache:
+  prometheus_data:
+  grafana_data:
+  loki_data:

@@ -16,6 +16,14 @@ A web service where you can upload an audio file, automatically split the track 
 
 ![Service Result UI](docs/images/service_result_UI.PNG)
 
+#### Prometheus Targets
+
+![Prometheus Targets](docs/images/prometheus.PNG)
+
+#### Grafana Observability Dashboard
+
+![Grafana Dashboard](docs/images/grafana.PNG)
+
 #### Full workflow
 
 ![Workflow Demo](docs/run_service.gif)
@@ -29,17 +37,24 @@ A web service where you can upload an audio file, automatically split the track 
 * Splits the track into stems using Demucs;
 * Saves the result to a shared volume;
 * Allows you to check the task status;
-* Allows you to download the finished ZIP archive with the results.
+* Allows you to download the finished ZIP archive with the results;
+* Exposes Prometheus metrics at `/metrics`;
+* Provides a Grafana dashboard for monitoring;
+* Collects container logs with Loki and Promtail.
 
 ## Architecture
 
 The service has several parts:
 
-* **FastAPI** — receives requests and sends responses;
-* **PostgreSQL** — stores tasks and their statuses;
-* **RabbitMQ** — the task queue;
-* **Celery worker** — runs the heavy background processing;
-* **Demucs** — splits the audio file into tracks.
+* **FastAPI** — REST API and static frontend;
+* **PostgreSQL** — stores tasks and statuses;
+* **RabbitMQ** — message broker;
+* **Celery worker** — asynchronous processing;
+* **Demucs** — audio source separation;
+* **Prometheus** — collects application metrics;
+* **Grafana** — visualizes metrics and dashboards;
+* **Loki** — stores container logs;
+* **Promtail** — ships Docker logs to Loki.
 
 ## Main Workflow
 
@@ -123,6 +138,10 @@ After it starts, you can access:
 * FastAPI: `http://localhost:8000`
 * RabbitMQ Management: `http://localhost:15672`
 * PostgreSQL: `localhost:5432`
+* FastAPI: http://localhost:8000
+* RabbitMQ Management: http://localhost:15672
+* Prometheus: http://localhost:9090
+* Grafana: http://localhost:3000
 
 ### 3. Apply migrations
 
@@ -185,6 +204,20 @@ The project includes:
 * API tests;
 * Integration tests with PostgreSQL.
 
+## Monitoring
+
+The project includes an observability stack:
+
+* **Prometheus** collects FastAPI and RabbitMQ metrics.
+* **Grafana** provides dashboards for request rate, latency, queue size, CPU, memory usage, and error rate.
+* **Loki** stores container logs.
+* **Promtail** automatically collects Docker container logs and sends them to Loki.
+
+FastAPI metrics are available at:
+```powershell
+GET /metrics
+```
+
 ## Where Files Are Stored
 
 * Uploaded files are stored in a Docker volume mounted to `/app/uploads`;
@@ -211,6 +244,10 @@ In Docker, these directories are mounted as shared volumes so that the API and t
 * Celery
 * Demucs
 * Docker
+* Prometheus
+* Grafana
+* Loki
+* Promtail
 
 ## Troubleshooting (Possible Errors)
 
