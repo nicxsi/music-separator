@@ -2,6 +2,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.core.config import settings
 from app.presentation.routers import separation
@@ -10,6 +11,8 @@ from app.presentation.routers import separation
 def create_app(static_dir: Path | None = None) -> FastAPI:
     app = FastAPI(title="Music Separator")
     app.include_router(separation.router, prefix="/api")   # API routes
+
+    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
     # We give the stems files for playback in the browser
     app.mount(
